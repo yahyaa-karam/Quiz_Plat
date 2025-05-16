@@ -1,0 +1,29 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+        <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Questions</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/styles/main.css">
+</head>
+<body>
+
+<h2>Liste des Questions</h2>
+
+<a href="question?action=create">Ajouter une nouvelle Question</a><br/><br/>
+
+<table>
+    <tr>
+        <th>Question</th>
+        <th>Quiz</th>
+    </tr>
+    <c:forEach var="question" items="${questions}">
+        <tr>
+            <td>${question.texte}</td>
+            <td>${question.quiz.titre}</td>
+        </tr>
+    </c:forEach>
+</table>
+
+</body>
+</html>
