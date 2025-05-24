@@ -12,7 +12,7 @@ public class Quiz {
 
     private String titre;
     private String categorie;
-    private int duree;
+    private int duree;  // Durée en minutes
     private String niveau;
     private boolean published = false;
 
@@ -31,7 +31,8 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Question> questions;
 
-    // ✅ Constructeur utilisé dans les tests
+    public Quiz() {}
+
     public Quiz(String titre, String categorie, int duree, String niveau) {
         this.titre = titre;
         this.categorie = categorie;
@@ -39,8 +40,77 @@ public class Quiz {
         this.niveau = niveau;
     }
 
-    public Quiz() {}
+    // ✅ GETTERS / SETTERS
 
-    // Getters & Setters (inchangés) ...
-    // (tu peux garder ceux que tu avais, ils sont corrects)
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTitre() {
+        return titre;
+    }
+
+    public void setTitre(String titre) {
+        this.titre = titre;
+    }
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
+
+    public int getDuree() {
+        return duree;
+    }
+
+    public void setDuree(int duree) {
+        this.duree = duree;
+    }
+
+    public String getNiveau() {
+        return niveau;
+    }
+
+    public void setNiveau(String niveau) {
+        this.niveau = niveau;
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
+    public Utilisateur getEnseignant() {
+        return enseignant;
+    }
+
+    public void setEnseignant(Utilisateur enseignant) {
+        this.enseignant = enseignant;
+    }
+
+    public List<Classe> getClasses() {
+        return classes;
+    }
+
+    public void setClasses(List<Classe> classes) {
+        this.classes = classes;
+    }
+
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
+    }
 }
