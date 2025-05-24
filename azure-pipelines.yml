@@ -72,5 +72,5 @@ stages:
             script: |
               echo "🚀 Deploying to Tomcat..."
               curl -u $(TOMCAT_USERNAME):$(TOMCAT_PASSWORD) \
-                --upload-file $(System.ArtifactsDirectory)/quizappjee-artifact/*.war \
+              --upload-file $(System.ArtifactsDirectory)/quizappjee-artifact/**/*.war \
                 "http://192.168.100.36:8080/manager/text/deploy?path=/quizappjee&update=true"
