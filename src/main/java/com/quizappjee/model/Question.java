@@ -18,6 +18,14 @@ public class Question {
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 
+    // ✅ Constructeur utilisé dans les tests
+    public Question(String contenu, String type) {
+        this.contenu = contenu;
+        this.type = Type.valueOf(type.toUpperCase());
+    }
+
+    public Question() {}
+
     // Getters & Setters
 
     public int getId() {

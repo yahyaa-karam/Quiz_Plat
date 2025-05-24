@@ -12,7 +12,7 @@ public class Quiz {
 
     private String titre;
     private String categorie;
-    private int duree;  // Durée en minutes
+    private int duree;
     private String niveau;
     private boolean published = false;
 
@@ -31,75 +31,16 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Question> questions;
 
-    // Getters & Setters
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getTitre() {
-        return titre;
-    }
-
-    public void setTitre(String titre) {
+    // ✅ Constructeur utilisé dans les tests
+    public Quiz(String titre, String categorie, int duree, String niveau) {
         this.titre = titre;
-    }
-
-    public String getCategorie() {
-        return categorie;
-    }
-
-    public void setCategorie(String categorie) {
         this.categorie = categorie;
-    }
-
-    public int getDuree() {
-        return duree;
-    }
-
-    public void setDuree(int duree) {
         this.duree = duree;
-    }
-
-    public String getNiveau() {
-        return niveau;
-    }
-
-    public void setNiveau(String niveau) {
         this.niveau = niveau;
     }
 
-    public Utilisateur getEnseignant() {
-        return enseignant;
-    }
+    public Quiz() {}
 
-    public void setEnseignant(Utilisateur enseignant) {
-        this.enseignant = enseignant;
-    }
-
-    public List<Classe> getClasses() {
-        return classes;
-    }
-
-    public void setClasses(List<Classe> classes) {
-        this.classes = classes;
-    }
-    public boolean isPublished() {
-        return published;
-    }
-
-    public void setPublished(boolean published) {
-        this.published = published;
-    }
-    public List<Question> getQuestions() {
-        return questions;
-    }
-
-    public void setQuestions(List<Question> questions) {
-        this.questions = questions;
-    }
+    // Getters & Setters (inchangés) ...
+    // (tu peux garder ceux que tu avais, ils sont corrects)
 }

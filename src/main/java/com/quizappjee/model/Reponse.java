@@ -21,7 +21,15 @@ public class Reponse {
 
     private boolean estCorrect;
 
-    // Getters & Setters
+    // ✅ Constructeur utilisé dans les tests
+    public Reponse(String contenu, boolean estCorrect) {
+        this.contenu = contenu;
+        this.estCorrect = estCorrect;
+    }
+
+    public Reponse() {}
+
+    // Getters & Setters (inchangés)
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
