@@ -8,7 +8,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- task: UseJavaVersion@1
+- task: JavaToolInstaller@0
   displayName: '☕ Set Java 21'
   inputs:
     versionSpec: '21'
@@ -43,3 +43,4 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'quizappjee-artifact'
     publishLocation: 'Container'
+
