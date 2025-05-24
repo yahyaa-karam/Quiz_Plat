@@ -4,17 +4,17 @@ trigger:
       - main
 
 variables:
-  - group: tomcat-credentials  # Injecte TOMCAT_USERNAME et TOMCAT_PASSWORD
+  - group: tomcat-credentials  # Défini dans Azure DevOps (TOMCAT_USERNAME / TOMCAT_PASSWORD)
 
 pool:
   vmImage: 'ubuntu-latest'
 
 stages:
 
-# ------------ BUILD STAGE ------------
+# ------------ BUILD ------------
 - stage: Build
   jobs:
-    - job: Build
+    - job: BuildJob
       steps:
         - task: JavaToolInstaller@0
           displayName: "☕ Install Java 17"
@@ -24,10 +24,10 @@ stages:
             jdkSourceOption: PreInstalled
 
         - task: Maven@4
-          displayName: '📦 Build & Test with Maven'
+          displayName: '📦 Build & Test'
           inputs:
             mavenPomFile: 'pom.xml'
-            goals: 'clean install'
+            goals: 'clean package'
             options: '-Dmaven.test.failure.ignore=false'
             publishJUnitResults: true
             testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -40,9 +40,9 @@ stages:
             failTaskOnFailedTests: true
 
         - task: CopyFiles@2
-          displayName: '📁 Copy WAR to Staging'
+          displayName: '📁 Copy WAR to staging'
           inputs:
-            contents: '**/*.war'
+            contents: '**/QuizAppJEE-1.0-SNAPSHOT.war'
             targetFolder: '$(Build.ArtifactStagingDirectory)'
 
         - task: PublishBuildArtifacts@1
@@ -52,12 +52,12 @@ stages:
             ArtifactName: 'quizappjee-artifact'
             publishLocation: 'Container'
 
-# ------------ DEPLOY STAGE ------------
+# ------------ DEPLOY ------------
 - stage: Deploy
   dependsOn: Build
   condition: succeeded()
   jobs:
-    - job: DeployToTomcat
+    - job: DeployJob
       steps:
         - task: DownloadBuildArtifacts@0
           inputs:
@@ -67,10 +67,22 @@ stages:
             downloadPath: '$(System.ArtifactsDirectory)'
 
         - task: Bash@3
+          displayName: '🌍 Deploy to Public Tomcat (196.77.59.141:8083)'
           inputs:
             targetType: 'inline'
             script: |
+              echo "🔍 Looking for WAR file..."
+              WAR_PATH=$(find $(System.ArtifactsDirectory)/quizappjee-artifact -name "QuizAppJEE-1.0-SNAPSHOT.war" | head -n 1)
+
+              if [ -f "$WAR_PATH" ]; then
+                echo "✅ WAR found: $WAR_PATH"
+              else
+                echo "❌ WAR file not found."
+                exit 1
+              fi
+
               echo "🚀 Deploying to Tomcat..."
-              curl -u $(TOMCAT_USERNAME):$(TOMCAT_PASSWORD) \
-              --upload-file $(System.ArtifactsDirectory)/quizappjee-artifact/**/*.war \
-                "http://192.168.100.36:8080/manager/text/deploy?path=/quizappjee&update=true"
+              curl -v -u $(TOMCAT_USERNAME):$(TOMCAT_PASSWORD) \
+                --upload-file "$WAR_PATH" \
+                "http://196.77.59.141:8083/manager/text/deploy?path=/quizappjee&update=true"
+
