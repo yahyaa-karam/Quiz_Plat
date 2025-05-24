@@ -1,16 +1,22 @@
 package com.quizappjee.dao;
 
 import com.quizappjee.model.Reponse;
-import com.quizappjee.util.HibernateUtil;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.util.List;
 
 public class ReponseDAO {
 
+    private SessionFactory sessionFactory;
+
+    public ReponseDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     public boolean ajouterReponse(Reponse reponse) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             session.save(reponse);
             tx.commit();
@@ -22,7 +28,7 @@ public class ReponseDAO {
     }
 
     public Reponse rechercherParId(int id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             return session.get(Reponse.class, id);
         } catch (Exception e) {
             e.printStackTrace();
@@ -32,7 +38,7 @@ public class ReponseDAO {
 
     public void createReponse(Reponse reponse) {
         Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             tx = session.beginTransaction();
             session.save(reponse);
             tx.commit();
@@ -43,7 +49,7 @@ public class ReponseDAO {
     }
 
     public List<Reponse> getReponsesByQuestion(int questionId) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             return session.createQuery("from Reponse where question.id = :questionId", Reponse.class)
                     .setParameter("questionId", questionId).list();
         }
