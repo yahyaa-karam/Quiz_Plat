@@ -1,14 +1,21 @@
 trigger:
   branches:
     include:
-      - master
+      - main
       - dev
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- task: Maven@3
+- task: UseJavaVersion@1
+  displayName: '☕ Set Java 21'
+  inputs:
+    versionSpec: '21'
+    jdkArchitecture: 'x64'
+    jdkSourceOption: 'PreInstalled'
+
+- task: Maven@4
   displayName: '📦 Build & Test with Maven'
   inputs:
     mavenPomFile: 'pom.xml'
