@@ -32,9 +32,6 @@ public class QuestionDAO {
         return questions;
     }
 
-    /**
-     * Récupérer une question par son ID
-     */
     public Question findById(int id) {
         Session session = sessionFactory.openSession();
         Question question = session.get(Question.class, id);
@@ -42,7 +39,6 @@ public class QuestionDAO {
         return question;
     }
 
-    // Méthode à ajouter dans QuestionDAO
     public List<Question> findAllByQuizId(int quizId) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery("FROM Question WHERE quiz.id = :quizId", Question.class)
@@ -51,5 +47,24 @@ public class QuestionDAO {
         }
     }
 
+    public boolean ajouterQuestion(Question q) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            session.save(q);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
+    public Question rechercherParId(int i) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.get(Question.class, i);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

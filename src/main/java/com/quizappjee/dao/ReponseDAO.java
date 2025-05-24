@@ -9,6 +9,27 @@ import java.util.List;
 
 public class ReponseDAO {
 
+    public boolean ajouterReponse(Reponse reponse) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+            session.save(reponse);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Reponse rechercherParId(int id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.get(Reponse.class, id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void createReponse(Reponse reponse) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {

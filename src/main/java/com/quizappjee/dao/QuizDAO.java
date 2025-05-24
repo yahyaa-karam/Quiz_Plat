@@ -1,3 +1,4 @@
+
 package com.quizappjee.dao;
 
 import com.quizappjee.model.Quiz;
@@ -27,7 +28,6 @@ public class QuizDAO {
         }
     }
 
-
     public List<Quiz> readAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery("FROM Quiz", Quiz.class).list();
@@ -39,7 +39,6 @@ public class QuizDAO {
             return session.get(Quiz.class, id);
         }
     }
-
 
     public List<Quiz> getQuizzesByEnseignantId(int enseignantId) {
         try (Session session = sessionFactory.openSession()) {
@@ -75,6 +74,7 @@ public class QuizDAO {
             e.printStackTrace();
         }
     }
+
     public Quiz getQuizWithQuestions(int quizId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
@@ -84,6 +84,25 @@ public class QuizDAO {
         }
     }
 
+    public boolean ajouterQuiz(Quiz quiz) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            session.save(quiz);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-
+    public Quiz rechercherParId(int i) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.get(Quiz.class, i);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
+
