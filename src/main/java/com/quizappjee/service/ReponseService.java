@@ -4,12 +4,14 @@ import com.quizappjee.dao.ReponseDAO;
 import com.quizappjee.model.Question;
 import com.quizappjee.model.Reponse;
 import com.quizappjee.model.Etudiant;
+import com.quizappjee.util.HibernateUtil;
 
 import java.util.List;
 
 public class ReponseService {
 
-    private ReponseDAO reponseDAO = new ReponseDAO();
+    private ReponseDAO reponseDAO = new ReponseDAO(HibernateUtil.getSessionFactory());
+
 
     public void saveReponse(String contenu, Question question, Etudiant etudiant, boolean estCorrect) {
         Reponse reponse = new Reponse();
