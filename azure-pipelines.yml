@@ -1,58 +1,77 @@
 trigger:
-- main
+  branches:
+    include:
+      - main
+      - dev
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: tomcat-credentials
+  warFile: '**/target/*.war'
 
 stages:
-  - stage: Build
-    displayName: 📦 Build WAR
-    jobs:
-      - job: Build
-        steps:
-          - task: Maven@3
-            inputs:
-              mavenPomFile: 'pom.xml'
-              goals: 'package'
-              javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.11'
-              mavenOptions: '-Xmx3072m'
-              publishJUnitResults: true
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: UseJavaVersion@1
+      displayName: '☕ Use Java 17'
+      inputs:
+        versionSpec: '17'
+        architecture: 'x64'
 
-          - task: CopyFiles@2
-            inputs:
-              SourceFolder: '$(System.DefaultWorkingDirectory)/target'
-              Contents: '*.war'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: Maven@4
+      displayName: '📦 Build & Test with Maven'
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'clean install'
+        options: '-Dmaven.test.failure.ignore=false'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
 
-          - task: PublishBuildArtifacts@1
-            inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: 'quizappjee-artifact'
+    - task: PublishTestResults@2
+      displayName: '📊 Publish Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        failTaskOnFailedTests: true
 
-  - stage: Deploy
-    displayName: 🚀 Déploiement Tomcat
-    dependsOn: Build
-    condition: succeeded()
-    jobs:
-      - job: DeployToTomcat
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
+    - task: CopyFiles@2
+      displayName: '📁 Copy WAR to Staging'
+      inputs:
+        contents: '**/target/*.war'
+        targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: '🚀 Publish Artifact'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'quizappjee-artifact'
+        publishLocation: 'Container'
+
+- stage: Deploy
+  displayName: '🚀 Déploiement Tomcat'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployToTomcat
+    environment: 'staging'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
           - task: DownloadBuildArtifacts@0
             inputs:
-              buildType: 'current'
-              downloadType: 'single'
               artifactName: 'quizappjee-artifact'
-              downloadPath: '$(System.ArtifactsDirectory)'
+              downloadPath: '$(System.DefaultWorkingDirectory)/drop'
 
-          - script: |
-              echo "📡 Déploiement vers Tomcat..."
-              curl --fail --user "$(TOMCAT_USERNAME):$(TOMCAT_PASSWORD)" \
-                   --upload-file "$(System.ArtifactsDirectory)/quizappjee-artifact/*.war" \
-                   "http://192.168.100.36:8080/manager/text/deploy?path=/QuizAppJEE&update=true"
-            displayName: "💾 Déploiement WAR vers Tomcat"
-
+          - task: Bash@3
+            displayName: '📡 Deploy to Tomcat via manager-script'
+            inputs:
+              targetType: inline
+              script: |
+                echo "Déploiement en cours..."
+                curl -T $(System.DefaultWorkingDirectory)/drop/*.war \
+                  "http://192.168.100.36:8080/manager/text/deploy?path=/quizappjee&update=true" \
+                  --user "$(TOMCAT_USERNAME):$(TOMCAT_PASSWORD)"
