@@ -2,76 +2,75 @@ trigger:
   branches:
     include:
       - main
-      - dev
+
+variables:
+  - group: tomcat-credentials  # Injecte TOMCAT_USERNAME et TOMCAT_PASSWORD
 
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  warFile: '**/target/*.war'
-
 stages:
+
+# ------------ BUILD STAGE ------------
 - stage: Build
   jobs:
-  - job: Build
-    steps:
-    - task: UseJavaVersion@1
-      displayName: '☕ Use Java 17'
-      inputs:
-        versionSpec: '17'
-        architecture: 'x64'
+    - job: Build
+      steps:
+        - task: JavaToolInstaller@0
+          displayName: "☕ Install Java 17"
+          inputs:
+            versionSpec: "17"
+            jdkArchitectureOption: x64
+            jdkSourceOption: PreInstalled
 
-    - task: Maven@4
-      displayName: '📦 Build & Test with Maven'
-      inputs:
-        mavenPomFile: 'pom.xml'
-        goals: 'clean install'
-        options: '-Dmaven.test.failure.ignore=false'
-        publishJUnitResults: true
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        - task: Maven@4
+          displayName: '📦 Build & Test with Maven'
+          inputs:
+            mavenPomFile: 'pom.xml'
+            goals: 'clean install'
+            options: '-Dmaven.test.failure.ignore=false'
+            publishJUnitResults: true
+            testResultsFiles: '**/surefire-reports/TEST-*.xml'
 
-    - task: PublishTestResults@2
-      displayName: '📊 Publish Test Results'
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
-        failTaskOnFailedTests: true
+        - task: PublishTestResults@2
+          displayName: '📊 Publish Test Results'
+          inputs:
+            testResultsFormat: 'JUnit'
+            testResultsFiles: '**/surefire-reports/TEST-*.xml'
+            failTaskOnFailedTests: true
 
-    - task: CopyFiles@2
-      displayName: '📁 Copy WAR to Staging'
-      inputs:
-        contents: '**/target/*.war'
-        targetFolder: '$(Build.ArtifactStagingDirectory)'
+        - task: CopyFiles@2
+          displayName: '📁 Copy WAR to Staging'
+          inputs:
+            contents: '**/*.war'
+            targetFolder: '$(Build.ArtifactStagingDirectory)'
 
-    - task: PublishBuildArtifacts@1
-      displayName: '🚀 Publish Artifact'
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'quizappjee-artifact'
-        publishLocation: 'Container'
+        - task: PublishBuildArtifacts@1
+          displayName: '🚀 Publish Artifact'
+          inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: 'quizappjee-artifact'
+            publishLocation: 'Container'
 
+# ------------ DEPLOY STAGE ------------
 - stage: Deploy
-  displayName: '🚀 Déploiement Tomcat'
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - deployment: DeployToTomcat
-    environment: 'staging'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              artifactName: 'quizappjee-artifact'
-              downloadPath: '$(System.DefaultWorkingDirectory)/drop'
+    - job: DeployToTomcat
+      steps:
+        - task: DownloadBuildArtifacts@0
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            artifactName: 'quizappjee-artifact'
+            downloadPath: '$(System.ArtifactsDirectory)'
 
-          - task: Bash@3
-            displayName: '📡 Deploy to Tomcat via manager-script'
-            inputs:
-              targetType: inline
-              script: |
-                echo "Déploiement en cours..."
-                curl -T $(System.DefaultWorkingDirectory)/drop/*.war \
-                  "http://192.168.100.36:8080/manager/text/deploy?path=/quizappjee&update=true" \
-                  --user "$(TOMCAT_USERNAME):$(TOMCAT_PASSWORD)"
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo "🚀 Deploying to Tomcat..."
+              curl -u $(TOMCAT_USERNAME):$(TOMCAT_PASSWORD) \
+                --upload-file $(System.ArtifactsDirectory)/quizappjee-artifact/*.war \
+                "http://192.168.100.36:8080/manager/text/deploy?path=/quizappjee&update=true"
