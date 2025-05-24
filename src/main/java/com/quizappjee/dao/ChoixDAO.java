@@ -42,4 +42,9 @@ public class ChoixDAO {
         }
     }
 
+    public boolean ajouterChoix(Choix choix) {
+    }
+
+    public Choix rechercherParId(int i) {
+    }
 }

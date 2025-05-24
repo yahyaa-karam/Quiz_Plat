@@ -50,4 +50,7 @@ public class Choix {
     public void setQuestion(Question question) {
         this.question = question;
     }
+
+    public void setCorrect(boolean b) {
+    }
 }
