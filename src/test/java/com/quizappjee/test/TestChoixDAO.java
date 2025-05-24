@@ -1,9 +1,13 @@
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+package com.quizappjee.test;
 
-import dao.ChoixDAO;
-import models.Choix;
-import util.HibernateUtil;
+import com.quizappjee.dao.ChoixDAO;
+import com.quizappjee.model.Choix;
+import com.quizappjee.model.Question;
+import com.quizappjee.util.HibernateUtil;
+
+import org.junit.jupiter.api.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestChoixDAO {
 
@@ -16,14 +20,21 @@ public class TestChoixDAO {
 
     @Test
     void testAjouterChoix() {
-        Choix choix = new Choix("docker build", true);
-        boolean result = choixDAO.ajouterChoix(choix);
-        assertTrue(result);
+        Question question = new Question();
+        question.setId(1); // supposé exister
+
+        Choix choix = new Choix();
+        choix.setContenu("Option A");
+        choix.setCorrect(true);
+        choix.setQuestion(question);
+
+        boolean added = choixDAO.ajouterChoix(choix);
+        assertTrue(added);
     }
 
     @Test
     void testRechercherChoix() {
-        Choix choix = choixDAO.rechercherParId(1);  // à adapter à ton ID réel
+        Choix choix = choixDAO.rechercherParId(1);
         assertNotNull(choix);
     }
 }

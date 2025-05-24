@@ -1,9 +1,12 @@
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+package com.quizappjee.test;
 
-import dao.ReponseDAO;
-import models.Reponse;
-import util.HibernateUtil;
+import com.quizappjee.dao.ReponseDAO;
+import com.quizappjee.model.Reponse;
+import com.quizappjee.util.HibernateUtil;
+
+import org.junit.jupiter.api.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestReponseDAO {
 
